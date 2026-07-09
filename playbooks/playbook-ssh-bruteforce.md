@@ -67,3 +67,100 @@ sudo iptables -L INPUT -n | grep <ATTACKER_IP>
 
 ### Automated (executed by respond.sh)
 Evidence saved to: `/opt/ir-lab/evidence/<ALERT_ID>/`
+
+network/listening_ports.txt
+network/established_connections.txt
+network/iptables_rules.txt
+system/auth.log
+system/last_logins.txt
+system/audit_today.txt
+
+## EVIDENCE_HASHES.txt
+
+### Manual Collection
+```bash
+# Export SSH failed attempts for attacker IP
+grep "Failed password" /var/log/auth.log \
+  | grep <ATTACKER_IP> > evidence_ssh_attempts.txt
+
+# Export login history
+last -i | head -50 >> evidence_logins.txt
+
+# Export SSH journal
+sudo journalctl -u ssh --since "1 hour ago" >> evidence_journal.txt
+
+# Hash all evidence files
+sha256sum evidence_* > evidence_hashes.txt
+```
+
+---
+
+## 4. Eradication
+
+```bash
+# Verify no successful logins from attacker IP
+grep "Accepted" /var/log/auth.log | grep <ATTACKER_IP>
+
+# Check for new unauthorized user accounts
+awk -F: '$3 >= 1000 {print $1, $3}' /etc/passwd
+
+# Check for modified SSH authorized_keys
+find /home -name "authorized_keys" -newer /etc/passwd
+
+# Check for new cron jobs
+crontab -l
+ls -la /var/spool/cron/crontabs/
+cat /etc/crontab
+```
+
+---
+
+## 5. Recovery
+
+```bash
+# Enforce SSH key-only authentication
+sudo sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' \
+  /etc/ssh/sshd_config
+sudo systemctl restart ssh
+
+# Rotate SSH host keys if needed
+sudo rm /etc/ssh/ssh_host_*
+sudo dpkg-reconfigure openssh-server
+
+# Remove IP block after investigation (optional)
+sudo iptables -D INPUT -s <ATTACKER_IP> -j DROP
+sudo ufw delete deny from <ATTACKER_IP>
+```
+
+- [ ] Rotate credentials if compromise is suspected
+- [ ] Patch any exploited vulnerabilities
+- [ ] Update detection threshold if needed
+- [ ] Notify stakeholders
+
+---
+
+## 6. Timeline Template
+
+| Time (UTC) | Event |
+|---|---|
+| HH:MM:SS | Attack initiated from `<ATTACKER_IP>` |
+| HH:MM:SS | Detection engine triggered (threshold reached) |
+| HH:MM:SS | Automated response executed |
+| HH:MM:SS | IP blocked via iptables, UFW, hosts.deny |
+| HH:MM:SS | Evidence collected and hashed |
+| HH:MM:SS | Incident report generated |
+
+---
+
+## 7. Lessons Learned
+
+| Question | Answer |
+|---|---|
+| How was the attack detected? | Automated threshold detection in detect_incident.sh |
+| Was detection timely? | Within 30 seconds of threshold breach |
+| Did containment succeed? | Yes — IP blocked across 3 layers automatically |
+| Any gaps identified? | Document here after each incident |
+
+---
+
+*Playbook version 1.0 — IR Lab by alexrepsec*
