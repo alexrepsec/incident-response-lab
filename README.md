@@ -64,28 +64,28 @@ reverse shell   ──►    threshold reached           • process list
 ### Attack Detection
 The detection engine identified the SSH brute force from Kali (`192.168.126.129`) and triggered the automated response pipeline within one polling cycle (30 seconds).
 
-![Detection and automated response triggered](docs/images/blocks-ip.png)
+![Detection and automated response triggered](images/blocks-ip.png)
 
 ---
 
 ### IP Containment — iptables DROP Rules
 All traffic from the attacker IP was dropped at the kernel level via iptables, with additional blocks applied through UFW and `/etc/hosts.deny`.
 
-![iptables DROP rules applied to attacker IP](docs/images/ip-blocks-list.png)
+![iptables DROP rules applied to attacker IP](images/ip-blocks-list.png)
 
 ---
 
 ### Evidence Collected
 The response engine captured a full forensic snapshot at the moment of detection — network state, process list, auth logs, audit events — all SHA256-hashed for chain of custody.
 
-![Evidence directory structure](docs/images/evidence-collected.png)
+![Evidence directory structure](images/evidence-colected.png)
 
 ---
 
 ### Incident Report — Auto-Generated
 A structured Markdown incident report was generated automatically, including containment actions taken, evidence paths, and next-step recommendations.
 
-![Auto-generated incident report](docs/images/incident-report.png)
+![Auto-generated incident report](images/incident-report.png)
 
 ---
 
