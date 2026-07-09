@@ -78,7 +78,7 @@ All traffic from the attacker IP was dropped at the kernel level via iptables, w
 ### Evidence Collected
 The response engine captured a full forensic snapshot at the moment of detection — network state, process list, auth logs, audit events — all SHA256-hashed for chain of custody.
 
-![Evidence directory structure](images/evidence-colected.png)
+![Evidence directory structure](images/evidence-collected.png)
 
 ---
 
