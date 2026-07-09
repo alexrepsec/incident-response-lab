@@ -1,0 +1,92 @@
+<!-- ============================================================
+     IR Lab - Custom Wazuh Detection Rules
+     Deploy to: /var/ossec/etc/rules/ir_lab_rules.xml
+     Restart Wazuh after deploying:
+       sudo /var/ossec/bin/ossec-control restart
+     ============================================================ -->
+<group name="ir_lab,">
+
+  <!-- SSH Brute Force - High Frequency -->
+  <rule id="100001" level="12">
+    <if_matched_sid>5760</if_matched_sid>
+    <same_source_ip />
+    <frequency>5</frequency>
+    <timeframe>120</timeframe>
+    <description>IR Lab: SSH brute force attack detected from $(srcip)</description>
+    <group>authentication_failures,pci_dss_10.2.4,pci_dss_10.2.5,</group>
+  </rule>
+
+  <!-- Reverse Shell / Netcat Abuse -->
+  <rule id="100002" level="15">
+    <if_sid>80700</if_sid>
+    <match>nc -e|ncat|bash -i|/dev/tcp</match>
+    <description>IR Lab: Possible reverse shell or netcat abuse detected</description>
+    <group>attack,pci_dss_10.6.1,</group>
+  </rule>
+
+  <!-- New SUID Binary Created -->
+  <rule id="100003" level="13">
+    <if_sid>554</if_sid>
+    <match>suid</match>
+    <description>IR Lab: New SUID binary created - possible privilege escalation</description>
+    <group>rootkit,pci_dss_11.4,</group>
+  </rule>
+
+  <!-- /etc/passwd Modified -->
+  <rule id="100004" level="14">
+    <if_sid>550</if_sid>
+    <match>/etc/passwd</match>
+    <description>IR Lab: /etc/passwd was modified - possible unauthorized account creation</description>
+    <group>authentication_success,pci_dss_10.2.5,</group>
+  </rule>
+
+  <!-- /etc/sudoers Modified -->
+  <rule id="100005" level="14">
+    <if_sid>550</if_sid>
+    <match>/etc/sudoers</match>
+    <description>IR Lab: /etc/sudoers modified - possible privilege escalation attempt</description>
+    <group>attack,</group>
+  </rule>
+
+  <!-- nmap Execution Detected via auditd -->
+  <rule id="100006" level="10">
+    <if_sid>80700</if_sid>
+    <match>nmap</match>
+    <description>IR Lab: nmap execution detected on this host - possible reconnaissance</description>
+    <group>recon,</group>
+  </rule>
+
+  <!-- Crontab Modification - Persistence -->
+  <rule id="100007" level="11">
+    <if_sid>550</if_sid>
+    <match>/var/spool/cron|/etc/cron</match>
+    <description>IR Lab: Crontab modification detected - possible persistence mechanism</description>
+    <group>attack,persistence,</group>
+  </rule>
+
+  <!-- Suspicious Download Tool Execution -->
+  <rule id="100008" level="9">
+    <if_sid>80700</if_sid>
+    <match>wget|curl</match>
+    <description>IR Lab: wget/curl executed - possible C2 callback or dropper download</description>
+    <group>attack,</group>
+  </rule>
+
+  <!-- Hydra Brute Force Tool Detected -->
+  <rule id="100009" level="13">
+    <if_sid>80700</if_sid>
+    <match>hydra</match>
+    <description>IR Lab: Hydra brute force tool execution detected</description>
+    <group>attack,recon,</group>
+  </rule>
+
+  <!-- Authentication Spike - Multiple Users -->
+  <rule id="100010" level="11">
+    <if_matched_sid>5503</if_matched_sid>
+    <frequency>10</frequency>
+    <timeframe>60</timeframe>
+    <description>IR Lab: Authentication failure spike - possible credential stuffing attack</description>
+    <group>authentication_failures,</group>
+  </rule>
+
+</group>
