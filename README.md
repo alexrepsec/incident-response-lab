@@ -57,22 +57,23 @@ VMware VMnet1 — Host-Only Network (192.168.126.0/24)
 ---
 
 ## How It Works
+
+```
 Attack (Kali)          Detection (Ubuntu)         Response (automated)
 ──────────────         ──────────────────         ────────────────────
 hydra SSH BF    ──►    detect_incident.sh    ──►  Phase 1: Evidence
 nmap scan       ──►    polls every 30s            • network state
 reverse shell   ──►    threshold reached           • process list
-alert written to            • auth.log copy
-alerts.json (JSON)          • audit events
-──►  Phase 2: Containment
-• iptables DROP
-• UFW deny
-• hosts.deny
-──►  Phase 3: Report
-• Markdown report
-• SHA256 hashes
-
----
+                       alert written to            • auth.log copy
+                       alerts.json (JSON)          • audit events
+                                             ──►  Phase 2: Containment
+                                                  • iptables DROP
+                                                  • UFW deny
+                                                  • hosts.deny
+                                             ──►  Phase 3: Report
+                                                  • Markdown report
+                                                  • SHA256 hashes
+```
 
 ## Scenarios Covered
 
@@ -135,6 +136,8 @@ Every detection event is written to `/opt/ir-lab/logs/alerts.json` as structured
 ---
 
 ## Project Structure
+
+```
 incident-response-lab/
 ├── README.md
 ├── scripts/
@@ -142,18 +145,17 @@ incident-response-lab/
 │   ├── deploy_ir_scripts.sh          # Deploys engine as systemd service
 │   ├── ir_dashboard.sh               # Live terminal dashboard
 │   ├── detection/
-│   │   └── detect_incident.sh        # Detection engine (5 modules, 30s polling)
+│   │   └── detect_incident.sh        # Detection engine (6 modules, 30s polling)
 │   ├── response/
 │   │   └── respond.sh                # Evidence + containment + report
 │   └── simulation/
 │       └── attack_simulation.sh      # 3-phase attack from VM2
 ├── playbooks/
 │   ├── playbook-ssh-bruteforce.md    # Runbook T1110.001
-│   └── playbook-port-scan.md         # Runbook T1046
+│   └── playbook-port-scan.md        # Runbook T1046
 └── configs/
-└── wazuh_custom_rules.xml        # 10 custom Wazuh detection rules
-
----
+    └── wazuh_custom_rules.xml        # 8 custom Wazuh detection rules
+```
 
 ## Setup
 
